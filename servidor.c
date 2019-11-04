@@ -15,6 +15,10 @@ void inicio(){
     scanf("%d", &numParcelas);
 }
 
+void socket(){
+    
+}
+
 int main(void)
 {
     inicio()
