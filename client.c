@@ -12,7 +12,7 @@
 
 struct sockaddr_in remoto;
 
-#define PORTA 8082
+#define PORTA 5000
 #define LEN 4096
 int main(){
     int sockfd;
@@ -69,9 +69,7 @@ int main(){
             }
         }
 
-        printf("asdçlk -> %f", arrayMsgRead[0]);
         double sum, init = arrayMsgRead[0], end = arrayMsgRead[1];
-        // printf("%f -- %f", init, end);
         for (int  i = init; i <= end; i++)
         {
              sum += pow(-1, i) / ((2 * i) + 1);

@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <math.h>
 
-#define PORT 8082
+#define PORT 5000
 
 int nClients = 0;
 int numberCustomers, numbersInstallments, mode;
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     numberCustomers = atoi(argv[2]);
     mode = atoi(argv[3]);
 
-    int installmentClient = ceil((float) numbersInstallments/ (float)numberCustomers );
+    int installmentClient = ceil((double) numbersInstallments/ (double)numberCustomers );
     int arrayInstallment[numbersInstallments];
 
     for (int i = 0; i < numbersInstallments; i++)
