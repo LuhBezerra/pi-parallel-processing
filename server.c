@@ -17,14 +17,16 @@ int numberCustomers, numbersInstallments, mode;
 typedef struct
 {
     int sock;
-    int installments[];
+    int init;
+    int end;
 } Client;
 
 void *connection_handler(void *socket_desc)
 {
-    //Get the socket descriptor
+    //Get the struct
     Client *c = (Client *)socket_desc;
     int sock = c->sock;
+    int parc = c->init;
 
     int read_size;
     char *message, client_message[2000];
@@ -37,7 +39,7 @@ void *connection_handler(void *socket_desc)
     while ((read_size = recv(sock, client_message, 2000, 0)) > 0)
     {
         //end of string marker
-        client_message[read_size] = '\0';
+        // client_message[read_size] = '\0';
 
         //Send the message back to client
         write(sock, client_message, strlen(client_message));
@@ -68,12 +70,19 @@ int main(int argc, char *argv[])
     numberCustomers = atoi(argv[2]);
     mode = atoi(argv[3]);
 
+    int installmentClient = 2;
+    int arrayInstallment[numbersInstallments];
+
+    for (int i = 0; i < numbersInstallments; i++)
+    {
+        arrayInstallment[i] = i;
+    }
+
     Client arrayClient[numberCustomers];
 
     // arrayClient = realloc(arrayClient, numberCustomers * sizeof(Client));
     // arrayClient = malloc(sizeof(Client) * numberCustomers);
 
-    //Create socket
     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_desc == -1)
     {
@@ -81,38 +90,41 @@ int main(int argc, char *argv[])
     }
     puts("Socket created");
 
-    //Prepare the sockaddr_in structure
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(PORT);
 
-    //Bind
     if (bind(socket_desc, (struct sockaddr *)&server, sizeof(server)) < 0)
     {
-        //print the error message
         perror("bind failed. Error");
         return 1;
     }
     puts("bind done");
 
-    //Listen
     listen(socket_desc, 1);
 
     //Accept and incoming connection
     puts("Waiting for incoming connections...");
     c = sizeof(struct sockaddr_in);
 
-    //Accept and incoming connection
-    puts("Waiting for incoming connections...");
-    c = sizeof(struct sockaddr_in);
     pthread_t thread_id;
-    int i = 0;
-    int sockT, idT;
+    int i = 0, positionInstallment = 0;
 
     while ((client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t *)&c)))
     {
+        //Divide installments to clients
         arrayClient[i].sock = client_sock;
-        i = i + 1;
+        arrayClient[i].init = arrayInstallment[positionInstallment];
+        positionInstallment += installmentClient;
+        if ((sizeof(arrayInstallment) / sizeof(arrayInstallment[0])) > positionInstallment)
+        {
+            arrayClient[i].end = arrayInstallment[positionInstallment - 1];
+        }
+        else
+        {
+            arrayClient[i].end = arrayInstallment[(sizeof(arrayInstallment) / sizeof(arrayInstallment[0])) - 1];
+        }
+        i += 1;
 
         if (nClients <= numberCustomers - 1)
         {
@@ -121,8 +133,6 @@ int main(int argc, char *argv[])
             {
                 for (int count = 0; count < numberCustomers; count++)
                 {
-                    printf("\n%d\n", count);
-                    // sockT = arrayClient[i].sock;
                     if (pthread_create(&thread_id, NULL, connection_handler, (void *)&arrayClient[count]) < 0)
                     {
                         perror("could not create thread");
