@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <math.h>
 
-#define PORT 8888
+#define PORT 8082
 
 int nClients = 0;
 int numberCustomers, numbersInstallments, mode;
@@ -23,8 +23,6 @@ typedef struct
     int init;
     int end;
 } Client;
-
-
 
 void *connection_handler(void *socket_desc)
 {
@@ -61,10 +59,26 @@ void *connection_handler(void *socket_desc)
                 }
             }
         }
+    } else if (mode == 2){
+        msgSend = (double)mode;
+        send(sock, &msgSend, sizeof(msgSend), 0);
+
+        double arrayMsgSend[2] = {c->init,c->end};
+        double loteMsgRead;
+        send(sock, &arrayMsgSend, 2 * sizeof(arrayMsgSend),0);
+
+        while (1)
+        {
+            if(read(sock, &loteMsgRead, sizeof(loteMsgRead)) > 0){
+                result += loteMsgRead;
+                break;
+            }
+        }
     }
 
     if (read_size == 0)
     {   
+        threadTotal++;
         puts("Client disconnected");
         fflush(stdout);
     }
@@ -75,7 +89,6 @@ void *connection_handler(void *socket_desc)
     pthread_exit((void*) 0);
     return 0;
 }
-
 int main(int argc, char *argv[])
 {
     int socket_desc, client_sock, c;

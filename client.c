@@ -12,7 +12,7 @@
 
 struct sockaddr_in remoto;
 
-#define PORTA 8888
+#define PORTA 8082
 #define LEN 4096
 int main(){
     int sockfd;
@@ -48,7 +48,6 @@ int main(){
         }
     }
     int mode = (int)msgRead;
-    printf("%d", mode);
     if(mode == 1){
         while(1){
             if((slen = recv(sockfd, &msgRead, sizeof(msgRead), 0)) > 0){
@@ -61,10 +60,26 @@ int main(){
             }
         }
     } else if (mode == 2){
-        printf("MODO 2");
+        double arrayMsgRead[2];
+        double loteMsgSend;
+
+        while(1){
+            if((slen = recv(sockfd, &arrayMsgRead, 2 * sizeof(arrayMsgRead), 0)) > 0){
+                break;
+            }
+        }
+
+        printf("asdçlk -> %f", arrayMsgRead[0]);
+        double sum, init = arrayMsgRead[0], end = arrayMsgRead[1];
+        // printf("%f -- %f", init, end);
+        for (int  i = init; i <= end; i++)
+        {
+             sum += pow(-1, i) / ((2 * i) + 1);
+        }
+        send(sockfd, &sum, sizeof(sum), 0);
     }
 
     close(sockfd);
-    printf("Client/e  encerrado\n");
+    printf("Cliente  encerrado\n");
     return 0;
 }
