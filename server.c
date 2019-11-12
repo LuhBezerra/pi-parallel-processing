@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <math.h>
 
-#define PORT 2000
+#define PORT 5000
 
 int nClients = 0;
 int numberCustomers, numbersInstallments, mode;
@@ -32,8 +32,8 @@ void *connection_handler(void *socket_desc)
     char *message, client_message[2000];
 
     //Send some messages to the client
-    message = "Greetings! I am your connection handler\n";
-    write(sock, message, strlen(message));
+    message = "Hellooo";
+    send(sock, &parc, sizeof(parc), 0);
 
     //Receive a message from client
     while ((read_size = recv(sock, client_message, 2000, 0)) > 0)
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     numberCustomers = atoi(argv[2]);
     mode = atoi(argv[3]);
 
-    int installmentClient = 2;
+    int installmentClient = ceil((float) numbersInstallments/ (float)numberCustomers );
     int arrayInstallment[numbersInstallments];
 
     for (int i = 0; i < numbersInstallments; i++)
