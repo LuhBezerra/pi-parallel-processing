@@ -9,47 +9,62 @@
 #include <pthread.h>
 #include <math.h>
 
-#define PORT 5000
+#define PORT 8888
 
 int nClients = 0;
 int numberCustomers, numbersInstallments, mode;
+double result = 0;
+int threadTotal = 0;
 
 typedef struct
 {
     int sock;
+    int mode;
     int init;
     int end;
 } Client;
 
+
+
 void *connection_handler(void *socket_desc)
 {
-    //Get the struct
     Client *c = (Client *)socket_desc;
     int sock = c->sock;
+    int mode = c->mode;
     int parc = c->init;
-
+    int parcEnd = c->end;
     int read_size;
-    char *message, client_message[2000];
 
-    //Send some messages to the client
-    message = "Hellooo";
-    send(sock, &parc, sizeof(parc), 0);
+    int close = 1;
+    double msgSend;
 
-    //Receive a message from client
-    while ((read_size = recv(sock, client_message, 2000, 0)) > 0)
-    {
-        //end of string marker
-        // client_message[read_size] = '\0';
+    if(mode == 1){
+        msgSend = (double)mode;
+        send(sock, &msgSend, sizeof(msgSend), 0);
 
-        //Send the message back to client
-        write(sock, client_message, strlen(client_message));
+        double msgRead;
+        double msgSend = (double)parc;
 
-        //clear the message buffer
-        memset(client_message, 0, 2000);
+        send(sock, &msgSend, sizeof(msgSend), 0);
+        //Receive a message from client
+        while (1)
+        {
+            if(read_size = read(sock, &msgRead, sizeof(msgRead)) > 0 && close > 0){
+                result += msgRead;
+                if(msgSend+1 > parcEnd){
+                    close = -1;
+                    send(sock, &close, sizeof(close),0);
+                    threadTotal++;
+                } else {
+                    msgSend = msgSend+1;
+                    send(sock, &msgSend, sizeof(msgSend), 0);
+                }
+            }
+        }
     }
 
     if (read_size == 0)
-    {
+    {   
         puts("Client disconnected");
         fflush(stdout);
     }
@@ -57,7 +72,7 @@ void *connection_handler(void *socket_desc)
     {
         perror("recv failed");
     }
-
+    pthread_exit((void*) 0);
     return 0;
 }
 
@@ -79,9 +94,6 @@ int main(int argc, char *argv[])
     }
 
     Client arrayClient[numberCustomers];
-
-    // arrayClient = realloc(arrayClient, numberCustomers * sizeof(Client));
-    // arrayClient = malloc(sizeof(Client) * numberCustomers);
 
     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_desc == -1)
@@ -114,6 +126,7 @@ int main(int argc, char *argv[])
     {
         //Divide installments to clients
         arrayClient[i].sock = client_sock;
+        arrayClient[i].mode = mode;
         arrayClient[i].init = arrayInstallment[positionInstallment];
         positionInstallment += installmentClient;
         if ((sizeof(arrayInstallment) / sizeof(arrayInstallment[0])) > positionInstallment)
@@ -139,6 +152,7 @@ int main(int argc, char *argv[])
                         return 1;
                     }
                 }
+                break;
             }
             nClients = nClients + 1;
             puts("Handler assigned");
@@ -148,10 +162,15 @@ int main(int argc, char *argv[])
             write(client_sock, "Client limit", strlen("Client limit"));
             printf("Client limit");
         }
-        //Now join the thread , so that we dont terminate before the thread
-        //pthread_join( thread_id , NULL);
     }
 
+    while(1){
+        if(threadTotal == numberCustomers){
+            printf("O resultado eh: %f", result*4);
+            break;
+        }    
+    }
+    
     if (client_sock < 0)
     {
         perror("accept failed");

@@ -8,16 +8,16 @@
 #include <netinet/in.h>
 #include <arpa/inet.h> 
 #include <unistd.h>
+#include <math.h>
 
 struct sockaddr_in remoto;
 
-#define PORTA 5000
+#define PORTA 8888
 #define LEN 4096
 int main(){
     int sockfd;
     int slen;
     int len = sizeof(remoto);
-    char buffer[4096];
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -40,15 +40,28 @@ int main(){
     } else {
         printf("conectado com o servidor");
     }
-    
+    double msgRead;
+    double result;
     while(1){
-        if((slen = recv(sockfd, buffer, LEN, 0)) > 0){
-            buffer[slen-1] = '\0';
-            printf("Mensagem recebida: %s\n", buffer);
+        if(recv(sockfd, &msgRead, sizeof(msgRead), 0) > 0){
+            break;
         }
-        memset(buffer, 0x0, LEN);
-        fgets(buffer, LEN, stdin);
-        send(sockfd, buffer, strlen(buffer), 0);
+    }
+    int mode = (int)msgRead;
+    printf("%d", mode);
+    if(mode == 1){
+        while(1){
+            if((slen = recv(sockfd, &msgRead, sizeof(msgRead), 0)) > 0){
+                if(msgRead > -1){
+                    result = pow(-1, msgRead) / ((2 * msgRead) + 1);
+                    send(sockfd, &result, sizeof(result),0);
+                } else {
+                    break;
+                }
+            }
+        }
+    } else if (mode == 2){
+        printf("MODO 2");
     }
 
     close(sockfd);
