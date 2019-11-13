@@ -57,6 +57,8 @@ int main(){
                 } else {
                     break;
                 }
+            }else{
+                break;
             }
         }
     } else if (mode == 2){
@@ -78,6 +80,6 @@ int main(){
     }
 
     close(sockfd);
-    printf("Cliente  encerrado\n");
+    printf("\nCliente  encerrado\n");
     return 0;
 }

@@ -15,6 +15,7 @@ int nClients = 0;
 int numberCustomers, numbersInstallments, mode;
 double result = 0;
 int threadTotal = 0;
+clock_t t;
 
 typedef struct
 {
@@ -157,6 +158,8 @@ int main(int argc, char *argv[])
             puts("Connection accepted");
             if (nClients == numberCustomers - 1)
             {
+                t = clock();
+                printf("\nStarting of the program, start_t = %ld\n", t);
                 for (int count = 0; count < numberCustomers; count++)
                 {
                     if (pthread_create(&thread_id, NULL, connection_handler, (void *)&arrayClient[count]) < 0)
@@ -179,7 +182,13 @@ int main(int argc, char *argv[])
 
     while(1){
         if(threadTotal == numberCustomers){
-            printf("O resultado eh: %f", result*4);
+            t = clock() - t;
+            printf("\nEnd of the program = %ld\n", t);
+            double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+            printf("\n>>>Took %f seconds to run program \n", time_taken); 
+            //printf("Um segundo tem: %ld\n", CLOCKS_PER_SEC);
+
+            printf("\nO resultado eh: %f\n", result*4);
             break;
         }    
     }
