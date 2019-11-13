@@ -1,5 +1,3 @@
-//  gcc server.c -lpthread -o server
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
