@@ -31,7 +31,7 @@ int main(){
     
     remoto.sin_family        = AF_INET;
     remoto.sin_port          = htons(PORTA);
-    remoto.sin_addr.s_addr   = inet_addr("127.0.0.1");
+    remoto.sin_addr.s_addr   = inet_addr("192.168.16.188");
     memset(remoto.sin_zero, 0x0, 8);
 
     if(connect(sockfd, (struct sockaddr*)&remoto,  len) == -1){
