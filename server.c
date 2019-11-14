@@ -88,6 +88,7 @@ void *connection_handler(void *socket_desc)
     pthread_exit((void*) 0);
     return 0;
 }
+
 int main(int argc, char *argv[])
 {
     int socket_desc, client_sock, c;
@@ -134,7 +135,6 @@ int main(int argc, char *argv[])
 
     while ((client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t *)&c)))
     {
-        //Divide installments to clients
         arrayClient[i].sock = client_sock;
         arrayClient[i].mode = mode;
         arrayClient[i].init = arrayInstallment[positionInstallment];
