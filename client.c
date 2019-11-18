@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-//socket
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -31,7 +30,7 @@ int main(){
     
     remoto.sin_family        = AF_INET;
     remoto.sin_port          = htons(PORTA);
-    remoto.sin_addr.s_addr   = inet_addr("127.0.0.1");
+    remoto.sin_addr.s_addr   = inet_addr("192.168.16.188");
     memset(remoto.sin_zero, 0x0, 8);
 
     if(connect(sockfd, (struct sockaddr*)&remoto,  len) == -1){
@@ -57,6 +56,8 @@ int main(){
                 } else {
                     break;
                 }
+            }else{
+                break;
             }
         }
     } else if (mode == 2){
@@ -78,6 +79,6 @@ int main(){
     }
 
     close(sockfd);
-    printf("Cliente  encerrado\n");
+    printf("\nCliente  encerrado\n");
     return 0;
 }

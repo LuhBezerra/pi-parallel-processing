@@ -1,5 +1,3 @@
-//  gcc server.c -lpthread -o server
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,6 +13,7 @@ int nClients = 0;
 int numberCustomers, numbersInstallments, mode;
 double result = 0;
 int threadTotal = 0;
+clock_t t;
 
 typedef struct
 {
@@ -79,16 +78,17 @@ void *connection_handler(void *socket_desc)
     if (read_size == 0)
     {   
         threadTotal++;
-        puts("Client disconnected");
+        puts("Cliente desconectado");
         fflush(stdout);
     }
     else if (read_size == -1)
     {
-        perror("recv failed");
+        perror("Falha ao receber informacao.");
     }
     pthread_exit((void*) 0);
     return 0;
 }
+
 int main(int argc, char *argv[])
 {
     int socket_desc, client_sock, c;
@@ -111,9 +111,9 @@ int main(int argc, char *argv[])
     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_desc == -1)
     {
-        printf("Could not create socket");
+        printf("Falha ao criar socket");
     }
-    puts("Socket created");
+    puts("Socket criado");
 
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
@@ -121,15 +121,13 @@ int main(int argc, char *argv[])
 
     if (bind(socket_desc, (struct sockaddr *)&server, sizeof(server)) < 0)
     {
-        perror("bind failed. Error");
+        perror("Falha no bind");
         return 1;
     }
-    puts("bind done");
 
     listen(socket_desc, 1);
 
-    //Accept and incoming connection
-    puts("Waiting for incoming connections...");
+    puts("Esperando por conexoes...");
     c = sizeof(struct sockaddr_in);
 
     pthread_t thread_id;
@@ -137,7 +135,6 @@ int main(int argc, char *argv[])
 
     while ((client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t *)&c)))
     {
-        //Divide installments to clients
         arrayClient[i].sock = client_sock;
         arrayClient[i].mode = mode;
         arrayClient[i].init = arrayInstallment[positionInstallment];
@@ -154,39 +151,44 @@ int main(int argc, char *argv[])
 
         if (nClients <= numberCustomers - 1)
         {
-            puts("Connection accepted");
+            puts("Conexao aceita");
             if (nClients == numberCustomers - 1)
             {
+                t = clock();
+                printf("\nIniciando calculo, tempo = %ld\n", t);
                 for (int count = 0; count < numberCustomers; count++)
                 {
                     if (pthread_create(&thread_id, NULL, connection_handler, (void *)&arrayClient[count]) < 0)
                     {
-                        perror("could not create thread");
+                        perror("Erro ao criar thread");
                         return 1;
                     }
                 }
                 break;
             }
             nClients = nClients + 1;
-            puts("Handler assigned");
         }
         else
         {
-            write(client_sock, "Client limit", strlen("Client limit"));
-            printf("Client limit");
+            write(client_sock, "Limite de cliente", strlen("Limite de cliente"));
+            printf("Limite de cliente");
         }
     }
 
     while(1){
         if(threadTotal == numberCustomers){
-            printf("O resultado eh: %f", result*4);
+            t = clock() - t;
+            printf("\nFim do programa = %ld\n", t);
+            double time_taken = ((double)t)/CLOCKS_PER_SEC;
+            printf("\nResultado do calculo: %f\n", result*4);
+            printf("Tempo de execucao: %f segundos \n", time_taken);
             break;
         }    
     }
     
     if (client_sock < 0)
     {
-        perror("accept failed");
+        perror("Falha");
         return 1;
     }
 
