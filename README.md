@@ -19,7 +19,7 @@ gcc server.c -o server -lpthread -lm
 
 Cliente(s):
 ```
-gcc client.c -o client -lpthread -lm
+gcc client.c -o client -lm
 ```
 
 ### Execução
